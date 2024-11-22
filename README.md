@@ -61,7 +61,7 @@ Gradient Boosting is a machine learning technique for regression and classificat
 ### Installation
 1. Clone this repository:
     ```bash
-    git clone https://github.com/priyanshpsalian/ML_Project2.git
+    git clone https://github.com/priyanshpsalian/Project2.git
     ```
 
 3. Create a virtual environment
@@ -266,6 +266,7 @@ This model is particularly effective when balancing predictive performance and i
 The Gradient Boosting Regressor was tested using a comprehensive process:
 
 ### 1. **Data Preparation**
+- Geenrated the data from data generator.
 - Loading data from a CSV file.
 - Normalizing input features and target variables to the range [0, 1].
 - Splitting the dataset into training (80%) and testing (20%) sets.

@@ -1,4 +1,4 @@
-# Gradient Boosting Regression
+## Gradient Boosting Regression
 
 ## Table of Contents
 1. [Project Overview](#project-overview)

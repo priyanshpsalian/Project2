@@ -82,7 +82,7 @@ Gradient Boosting is a machine learning technique for regression and classificat
     pip3 install -r requirements.txt
     ```
 
-5. Run the test file to see the results
+6. Run the test file to see the results
     ```bash
     python3 -m gradientBoosting.tests.test_gradientBoostingModel
     ```

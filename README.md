@@ -64,16 +64,20 @@ Gradient Boosting is a machine learning technique for regression and classificat
     git clone https://github.com/priyanshpsalian/Project2.git
     ```
 
-3. Create a virtual environment
+2. Create a virtual environment
     ```bash
     python3 -m venv .env
     ```
-4. Activate the environment
+3. Activate the environment
     ```bash
     source .env/bin/activate  # On Unix or MacOS
     .env\Scripts\activate     # On Windows
     ```
-2. Install the required dependencies:
+4. Get into the repo.
+   ```bash
+   cd Project2
+   ```
+5. Install the required dependencies:
     ```bash
     pip3 install -r requirements.txt
     ```

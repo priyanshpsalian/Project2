@@ -33,21 +33,6 @@ class DecisionTree:
     def _mean_squared_error(self, y):
         """Calculate variance as a proxy for impurity."""
         return np.mean((y - np.mean(y)) ** 2)
-
-    def _compute_criterion(self, y):
-        """Determine impurity metric based on the criterion selection."""
-        if self.criterion == 'friedman_mse':
-            return self._mean_squared_error(y)
-        else:
-            raise ValueError(f"Unsupported criterion: {self.criterion}")
-
-    def _split(self, X, y, feature_index, threshold):
-        """Partition data into two subsets based on threshold."""
-        X = np.array(X)
-        left_idx = np.where(X[:, feature_index] <= threshold)  # IDs for left subset
-        right_idx = np.where(X[:, feature_index] > threshold)  # IDs for right subset
-        return X[left_idx], X[right_idx], y[left_idx], y[right_idx]
-
     def _best_split(self, X, y):
         """Locate the optimal feature and threshold to minimize impurity."""
         X = np.array(X)
@@ -93,6 +78,34 @@ class DecisionTree:
                     best_mse = child_mse
 
         return best_feature, best_threshold
+    
+    def _compute_criterion(self, y):
+        """Determine impurity metric based on the criterion selection."""
+        if self.criterion == 'friedman_mse':
+            return self._mean_squared_error(y)
+        else:
+            raise ValueError(f"Unsupported criterion: {self.criterion}")
+        
+    def _prune(self, node, alpha):
+        """On cost-complexity tree is simplified by merging nodes."""
+        if node.left is None and node.right is None:  # Leaf node
+            return node.value, 1, alpha * 1
+
+        # Prune left and right subtrees recursively
+        left_value, left_leaves, left_cost = self._prune(node.left, alpha) if node.left else (0, 0, 0)
+        right_value, right_leaves, right_cost = self._prune(node.right, alpha) if node.right else (0, 0, 0)
+
+        # Evaluate merge condition
+        if left_cost + right_cost <= alpha * (1 + left_leaves + right_leaves):
+            return (left_value + right_value) / (left_leaves + right_leaves), 1, alpha * 1
+
+        return node, left_leaves + right_leaves, left_cost + right_cost
+    def _split(self, X, y, feature_index, threshold):
+        """Partition data into two subsets based on threshold."""
+        X = np.array(X)
+        left_idx = np.where(X[:, feature_index] <= threshold)  # IDs for left subset
+        right_idx = np.where(X[:, feature_index] > threshold)  # IDs for right subset
+        return X[left_idx], X[right_idx], y[left_idx], y[right_idx]
 
     def _build_tree(self, X, y, depth):
         """Recursively create the decision tree structure."""
@@ -110,29 +123,6 @@ class DecisionTree:
         right_subtree = self._build_tree(X_right, y_right, depth + 1)
         return DecisionTreeNode(feature_index, threshold, left_subtree, right_subtree)
 
-    def _prune(self, node, alpha):
-        """On cost-complexity tree is simplified by merging nodes."""
-        if node.left is None and node.right is None:  # Leaf node
-            return node.value, 1, alpha * 1
-
-        # Prune left and right subtrees recursively
-        left_value, left_leaves, left_cost = self._prune(node.left, alpha) if node.left else (0, 0, 0)
-        right_value, right_leaves, right_cost = self._prune(node.right, alpha) if node.right else (0, 0, 0)
-
-        # Evaluate merge condition
-        if left_cost + right_cost <= alpha * (1 + left_leaves + right_leaves):
-            return (left_value + right_value) / (left_leaves + right_leaves), 1, alpha * 1
-
-        return node, left_leaves + right_leaves, left_cost + right_cost
-
-    def fit(self, X, y):
-        """Train the decision tree using the input data."""
-        X = np.array(X)
-        y = np.array(y)
-        self.root = self._build_tree(X, y, 0)  # Construct tree
-        if self.alpha_parameter > 0.0:  # Apply pruning if required
-            self.root, _, _ = self._prune(self.root, self.alpha_parameter)
-
     def _predict(self, x, node):
         """Traverse the tree to predict a single instance."""
         if isinstance(node, DecisionTreeNode):
@@ -143,6 +133,15 @@ class DecisionTree:
             else:  # Follow right branch
                 return self._predict(x, node.right)
         return node  # Handle pruned leaf
+    
+    def fit(self, X, y):
+        """Train the decision tree using the input data."""
+        X = np.array(X)
+        y = np.array(y)
+        self.root = self._build_tree(X, y, 0)  # Construct tree
+        if self.alpha_parameter > 0.0:  # Apply pruning if required
+            self.root, _, _ = self._prune(self.root, self.alpha_parameter)
+
 
     def predict(self, X):
         """Generate predictions for all data points."""
